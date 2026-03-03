@@ -1,5 +1,6 @@
 import numpy as np
 ### Graph Generation ###
+import numpy as np
 
 def generate_graph(params, n, seed=None): 
     
@@ -90,6 +91,26 @@ def sample_vertices_ppp(lambda_param, x, y, z, d, rng):
 
 
 ### Connection rule
+
+def torus_distance(x, y, L=1.0):                                                                                                     
+    """Toroidal (wrap-around) distance between two position vectors.                                                                                                                                                                                                    
+
+    Parameters                                                                                                                       
+    ----------
+    x, y : array-like, shape (d,)
+        Spatial coordinates of two vertices.
+    L : float
+        Side length of the spatial domain. Defaults to 1.0 (unit torus).
+
+    Returns
+    -------
+    float
+        Toroidal L2 distance in [0, L*sqrt(d)/2].
+    """
+    diff = np.abs(np.asarray(x, dtype=float) - np.asarray(y, dtype=float))
+    diff = np.minimum(diff, L - diff)   # wrap: take shorter path in each dim
+    
+    return float(np.sqrt(np.sum(diff ** 2)))
 
 def phi_profile_function(r, profile_cfg):
     """ Computes the profile value as a function of distance-like input """
