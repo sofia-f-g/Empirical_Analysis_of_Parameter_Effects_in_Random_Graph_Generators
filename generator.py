@@ -1,4 +1,3 @@
-import numpy as np
 ### Graph Generation ###
 
 def generate_graph(params, n, seed=None): 
@@ -8,7 +7,6 @@ def generate_graph(params, n, seed=None):
     
     # return (V,E) 
     return None
-
 
 ### Parameter + RNG utilities ###
 def validate_params(params):
