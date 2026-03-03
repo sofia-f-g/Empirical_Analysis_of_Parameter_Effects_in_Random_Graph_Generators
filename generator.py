@@ -131,10 +131,6 @@ def phi_profile_function(r, profile_cfg):
         return 0.0
 
 
-    lim = profile_cfg.get('limit')
-    phi = 1 if r<= lim else 0
-
-    return phi
 
 
 def connection_prob(v_i, v_j, params):
