@@ -91,6 +91,30 @@ def sample_vertices_ppp(lambda_param, x, y, z, d, rng):
 
 ### Connection rule
 
+def torus_distance(x, y, L=1.0):                                                                                                     
+    """Toroidal (wrap-around) distance between two position vectors.                                                                                                                                                                                                    
+
+    Parameters                                                                                                                       
+    ----------
+    x, y : array-like, shape (d,)
+        Spatial coordinates of two vertices.
+    L : float
+        Side length of the spatial domain. Defaults to 1.0 (unit torus).
+
+    Returns
+    -------
+    float
+        Toroidal L2 distance in [0, L*sqrt(d)/2].
+    """
+
+    # distance in the torus is the minimum of the direct distance and the wrap-around distance in each dimension
+    # from Peter Gracar's paper, section 2
+
+    diff = np.abs(np.asarray(x, dtype=float) - np.asarray(y, dtype=float))
+    diff = np.minimum(diff, L - diff)   # wrap: take shorter path in each dim
+    
+    return float(np.sqrt(np.sum(diff ** 2)))
+
 def phi_profile_function(r, profile_cfg):
     """ Computes the profile value as a function of distance-like input """
     """ We begin by a hard cut-off function, could be modified later """
@@ -108,8 +132,6 @@ def phi_profile_function(r, profile_cfg):
         return 1.0 / (2.0 * a)
     else: 
         return 0.0
-
-
 
 
 def connection_prob(v_i, v_j, params):
@@ -131,10 +153,7 @@ def connection_prob(v_i, v_j, params):
     t_young = max(t_i, t_j)
     t_old = min(t_i, t_j)
 
-
-
-
-    r = (t_young * dist(pos_i, pos_j)**d) / (beta * (t_young/t_old)**gamma)
+    r = (t_young * torus_distance(pos_i, pos_j)**d) / (beta * (t_young/t_old)**gamma)
 
     return phi_profile_function(r, profile_cfg)
     
@@ -147,3 +166,24 @@ def generate_edges(V, params, rng):
     """ Builds the edge list by iterating over candidate vertex pairs and
         sampling Bernoulli edges with function connection_prob """
 
+    n = len(V['id'])
+    edges = []
+
+    for i in range(1, n): # the younger vertex (starts at 1, since vertex 0 has no older vertices to connect to)
+        v_young = {'pos': V['pos'][i], 'birth_time': V['birth_time'][i]}
+
+        for j in range(i): # j = every older vertex than i (only consider j < i to ensure direction from younger to older beacause V is sorted by birth time)
+            v_older = {'pos': V['pos'][j], 'birth_time': V['birth_time'][j]}
+
+            p_ij = connection_prob(v_young, v_older, params)
+
+            if p_ij < 0 or p_ij > 1:
+                raise ValueError(f'Connection probability must be in [0,1], got {p_ij}')
+            
+            if rng.uniform() < p_ij:
+                edges.append((V['id'][i], V['id'][j]))  # directed edge from younger to older 
+    
+    if len(edges) == 0:
+      return np.empty((0, 2), dtype=int)
+    
+    return np.asarray(edges, dtype=int)
