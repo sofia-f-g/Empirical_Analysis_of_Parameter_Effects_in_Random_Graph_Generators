@@ -19,24 +19,24 @@ def validate_params(params):
     return None #raises error if wrong 
 
 def set_seed(seed):
-
     """ Creates and returns reproducible RNG object used by all sampling steps """
     
-    # return np.random.Generator
+    return np.random.default_rng(seed)
 
 
 ### Vertex sampling ###
 def sample_vertices_fixed_n(n, d, space_cfg, age_cfg, rng):
-
     """ Samples n vertices with positions in our chosen spatial window/torus
         and birth times (0, 1) returning a vertex table/array """
+    
+
     
     # return V
 
 def sample_vertices_ppp(lambda_param, x, y, z, d, rng):
 
     """ Samples vertices from a Poisson point process in space x time,
-        closer adherence to the original paper """
+        closer method to the original paper """
 
     # return V
 
@@ -63,3 +63,6 @@ def generate_edges(V, params, rng):
     """ Builds the edge list by iterating over candidate vertex pairs and
         sampling Bernoulli edges with function connection_prob """
 
+
+
+# Testar Sofia branch
