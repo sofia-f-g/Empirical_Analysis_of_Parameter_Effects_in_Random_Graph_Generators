@@ -112,6 +112,3 @@ def generate_edges(V, params, rng):
     """ Builds the edge list by iterating over candidate vertex pairs and
         sampling Bernoulli edges with function connection_prob """
 
-
-
-# Testar Sofia branch
