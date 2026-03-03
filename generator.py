@@ -1,3 +1,4 @@
+import numpy as np
 ### Graph Generation ###
 
 def generate_graph(params, n, seed=None): 
