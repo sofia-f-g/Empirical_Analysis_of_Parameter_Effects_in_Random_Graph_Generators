@@ -1,14 +1,14 @@
-import numpy as np
 ### Graph Generation ###
 
 def generate_graph(params, n, seed=None): 
+
+    a= 1
     
     """ Main wrapper:
         samples vertices and then samples edges according to our model """
     
     # return (V,E) 
     return None
-
 
 ### Parameter + RNG utilities ###
 def validate_params(params):
