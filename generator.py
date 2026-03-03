@@ -1,3 +1,4 @@
+import numpy as np
 ### Graph Generation ###
 
 def generate_graph(params, n, seed=None): 
@@ -91,15 +92,55 @@ def sample_vertices_ppp(lambda_param, x, y, z, d, rng):
 ### Connection rule
 
 def phi_profile_function(r, profile_cfg):
-
     """ Computes the profile value as a function of distance-like input """
+    """ We begin by a hard cut-off function, could be modified later """
 
-    # return a float in the interval [0,1]
+    # Profile function from section 2 (iv) in Peter Gracar's paper
+    # phi(x) = (1/(2a)) * 1_[0,a](x)
+    # Right now we don't know why a must be >= 1/2. research this!
+
+    a = float(profile_cfg.get('a', 0.5))
+
+    if a < 0.5:
+        raise ValueError('profile_cfg[a] must satisfy a >= 0.5')
+    
+    if 0 <= r <= a: 
+        return 1.0 / (2.0 * a)
+    else: 
+        return 0.0
+
+
+    lim = profile_cfg.get('limit')
+    phi = 1 if r<= lim else 0
+
+    return phi
+
 
 def connection_prob(v_i, v_j, params):
-
     """ Implements the model's connection probability for a directed edge i -> j,
         using ages, distance and parameters like beta, gamma and phi """
+    
+    # --- Read parameters from params dictionary --- #
+    beta = float(params['beta'])
+    gamma = float(params['gamma'])
+    d = int(params['dim'])
+    profile_cfg = params.get('profile_cfg', {})
+        
+    # --- Birth times and positions of vertices --- #
+    t_i = v_i['birth_time']
+    t_j = v_j['birth_time']
+    pos_i = v_i['pos']
+    pos_j = v_j['pos']
+
+    t_young = max(t_i, t_j)
+    t_old = min(t_i, t_j)
+
+
+
+
+    r = (t_young * dist(pos_i, pos_j)**d) / (beta * (t_young/t_old)**gamma)
+
+    return phi_profile_function(r, profile_cfg)
     
 
 
