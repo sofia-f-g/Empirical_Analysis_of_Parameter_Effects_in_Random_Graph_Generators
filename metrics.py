@@ -1,4 +1,6 @@
 import numpy as np
+from collections import deque
+
 
 ### Basic Graph Helpers ###
 
@@ -106,8 +108,14 @@ def clustering_coefficient(V, E):
 ### Paths / Distances ###
 
 def average_shortest_path_length(V, E):
+    """ Average shortest-path length over all connected 
+        vertex pairs in an undirected graph """
 
-    """ Computes mean shortest path length """
+    adjacency = build_adjacency(V, E)
+    n = len(adjacency)
+    
+    total_dist = 0
+    total_pairs = 0
 
     adj = build_adjacency(V, E)
     id_array = np.asarray(V['id'])
