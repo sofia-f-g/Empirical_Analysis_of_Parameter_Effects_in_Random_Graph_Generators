@@ -14,6 +14,7 @@ def build_adjacency(V, E, directed=False):
     n_vertices = len(id_array)
 
     # Map each original vertex id to a 0..n-1 slot in the adjacency structure
+    # adjacency[idx] corresponds to vertex id V["id"][idx]
     index_of = {int(v_id): idx for idx, v_id in enumerate(id_array)}
 
     adjacency = [[] for _ in range(n_vertices)]
@@ -37,11 +38,14 @@ def build_adjacency(V, E, directed=False):
 
 
 def compute_degree_sequences(V, E):
-
     """ Computes in- and out-degree arrays for all vertices from 
-        the directed edge list """
+        the undirected edge list """
     
-    # return (in_deg, out_deg)
+    adjacency = build_adjacency(V, E)
+    degrees = np.array([len(neigh) for neigh in adjacency], dtype=int)
+    dict = {'id': np.asarray(V['id']), 'degree': degrees}
+    return dict
+    
 
 
 ### Degree Distribution ###
