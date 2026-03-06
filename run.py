@@ -1,15 +1,27 @@
 import io  # local io.py — save/load raw and summary CSVs
 from datetime import datetime
+import generator
+import metrics
+
 
 
 ### Running Simulations ###
 
 def run_one_simulation(params, n, seed):
+    generator.validate_params(params)
 
-    # (V, E) = generator.generate_graph
-    # dict = metrics.compute_metrics(V, E)
+    (V, E) = generator.generate_graph(params, n, seed)
+    metric_row = metrics.compute_metrics(V, E)
 
-    return None
+    # Attach which parameters generated the results
+    metric_row.update({
+        "seed": seed,
+        "beta": params["beta"],
+        "gamma": params["gamma"],
+        "dim": params["dim"],
+    })
+    
+    return metric_row
 
 def run_replicates(params, n, R, base_seed):
 
