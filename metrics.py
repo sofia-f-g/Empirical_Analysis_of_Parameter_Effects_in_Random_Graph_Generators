@@ -74,6 +74,7 @@ def clustering_coefficient(V, E):
 
     adj = build_adjacency(V, E, directed=False)
     adj_sets = [set(neighbors) for neighbors in adj]
+    index_of = {int(v_id): idx for idx, v_id in enumerate(np.asarray(V['id']))}
 
     n = len(adj)
     local_coeffs = []
@@ -91,7 +92,7 @@ def clustering_coefficient(V, E):
         neighbors = adj[v]
         for i in range(len(neighbors)):
             for j in range(i + 1, len(neighbors)):
-                if neighbors[j] in adj_sets[neighbors[i]]:
+                if neighbors[j] in adj_sets[index_of[neighbors[i]]]:
                     edges_between += 1
 
         local_coeffs.append(edges_between / possible)
@@ -116,50 +117,52 @@ def average_shortest_path_length(V, E):
     total_dist = 0
     total_pairs = 0
 
-    for v in range(n):
-        # The shortest distance to all other vertices
-        distances = bfs_distances(adjacency, v)
-
-        # Add all 'connected' pairs and their distance
-        for i in range (v+1, n):
-            d = distances[i]
-            if d >= 0:  # -1 if there is no path between vertices
-                total_dist += d
-                total_pairs += 1
-
-    if total_pairs == 0:
-        raise ValueError('No connected vertices - graph is totally disconnected')
-    
-    return total_dist / total_pairs
-
-# Helper function
-def bfs_distances(adjacency, start):
-    n = len(adjacency)
-    distances = [-1] * n
-    distances[start] = 0
-
-    # Create a double-ended queue with the first vertex as starting point
-    q = deque([start])
-
-    while q:
-        v = q.popleft()
-
-        # Go to direct neighbours
-        for neighbour in adjacency[v]:
-            # If unvisited 
-            if distances[neighbour] == -1:
-                distances[neighbour] = distances[v] + 1
-                # Add neighbours to queue so we check next layer of vertices
-                q.append(neighbour)
-    
-    return distances
+    adj = build_adjacency(V, E)
+    id_array = np.asarray(V['id'])
+    index_of = {int(v_id): idx for idx, v_id in enumerate(id_array)}
+    n = len(adj)
+    total, count = 0, 0
+    for src in range(n):
+        dist = [-1] * n
+        dist[src] = 0
+        queue = [src]
+        head = 0
+        while head < len(queue):
+            u = queue[head]; head += 1
+            for w_id in adj[u]:
+                w = index_of[w_id]
+                if dist[w] == -1:
+                    dist[w] = dist[u] + 1
+                    queue.append(w)
+        for d in dist:
+            if d > 0:
+                total += d; count += 1
+    return total / count if count > 0 else 0.0
 
 
 ### Wrapper ###
 
 def compute_metrics(V, E):
 
-    """ Return a dictionary of all required metrics, 
+    """ Return a dictionary of all required metrics,
         degrees, clustering, path length, edges etc. """
-    
-    # return dict
+
+    n_vertices = len(V['id'])
+    n_edges = 0 if E is None or len(E) == 0 else len(E)
+
+    deg_seq = compute_degree_sequences(V, E)
+    degrees = deg_seq['degree']
+
+    cc = clustering_coefficient(V, E)
+    aspl = average_shortest_path_length(V, E)
+
+    return {
+        'n_vertices': n_vertices,
+        'n_edges': n_edges,
+        'degree_mean': float(np.mean(degrees)),
+        'degree_max': int(np.max(degrees)),
+        'degree_min': int(np.min(degrees)),
+        'avg_local_clustering': cc['avg_local'],
+        'global_clustering': cc['global'],
+        'avg_shortest_path_length': aspl,
+    }
