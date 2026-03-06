@@ -3,3 +3,4 @@ scipy
 infomap
 os
 csv
+collections

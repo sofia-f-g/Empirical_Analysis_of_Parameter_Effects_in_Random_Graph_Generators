@@ -30,6 +30,8 @@ def sample_vertices_fixed_n(n, d, space_cfg, age_cfg, rng):
     
     if n < 0:
         raise ValueError('n must be non-negative')
+    elif n == 0:
+        raise ValueError('Trivial graph, n=0 implies no vertices')
     if d <= 0:
         raise ValueError('d must be a positive integer')
     

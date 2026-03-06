@@ -1,4 +1,6 @@
 import numpy as np
+from collections import deque
+
 
 ### Basic Graph Helpers ###
 
@@ -105,9 +107,52 @@ def clustering_coefficient(V, E):
 ### Paths / Distances ###
 
 def average_shortest_path_length(V, E):
+    """ Average shortest-path length over all connected 
+        vertex pairs in an undirected graph """
 
-    """ Computes mean shortest path length """
+    adjacency = build_adjacency(V, E)
+    n = len(adjacency)
+    
+    total_dist = 0
+    total_pairs = 0
 
+    for v in range(n):
+        # The shortest distance to all other vertices
+        distances = bfs_distances(adjacency, v)
+
+        # Add all 'connected' pairs and their distance
+        for i in range (v+1, n):
+            d = distances[i]
+            if d >= 0:  # -1 if there is no path between vertices
+                total_dist += d
+                total_pairs += 1
+
+    if total_pairs == 0:
+        raise ValueError('No connected vertices - graph is totally disconnected')
+    
+    return total_dist / total_pairs
+
+# Helper function
+def bfs_distances(adjacency, start):
+    n = len(adjacency)
+    distances = [-1] * n
+    distances[start] = 0
+
+    # Create a double-ended queue with the first vertex as starting point
+    q = deque([start])
+
+    while q:
+        v = q.popleft()
+
+        # Go to direct neighbours
+        for neighbour in adjacency[v]:
+            # If unvisited 
+            if distances[neighbour] == -1:
+                distances[neighbour] = distances[v] + 1
+                # Add neighbours to queue so we check next layer of vertices
+                q.append(neighbour)
+    
+    return distances
 
 
 ### Wrapper ###
